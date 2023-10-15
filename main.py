@@ -10,7 +10,7 @@ except:
     notes = {}
 
 app = QApplication([])
-window = QWidget ()
+window = QWidget ()#
 listNotesLbl = QLabel("Список заміток")
 textedit = QTextEdit()
 listnotes = QListWidget()
@@ -22,7 +22,7 @@ listteg = QListWidget()
 searchonteg = QLineEdit()
 addtonote = QPushButton("Додати до замітки")
 deletefromnote = QPushButton("Видалити від замітки")
-searchnote = QPushButton("Шукати замітки по тегу")
+searchnote = QPushButton("Шукати замітки за тегом")
 
 mainline= QHBoxLayout ()
 mainline.addWidget(textedit)
@@ -101,10 +101,25 @@ def del_tag(): #кнопка видалити тег
     else:
         print("Тег для вилучення не обраний!")
 
+def add_tag():#кнопка добавити тег
+    if listnotes.selectedItems():
+        key = listnotes.selectedItems()[0].text()
+        tag = textedit.toPlainText()
+        if not tag in notes[key]["теги"]:
+            notes[key]["теги"].append(tag)
+            listteg.addItem(tag)
+            textedit.clear()
+        with open("note_data.json", "w", encoding="utf-8") as file:
+            json.dump(notes, file,  ensure_ascii=False)
+        print(notes)
+    else:
+        print("Замітка для додавання тега не обрана!")
+
+
 
 def search_tag(): #кнопка "шукати замітку за тегом"
     button_text = searchnote.text()
-    tag = field_tag.text()
+    tag = textedit.toPlainText()
 
     if button_text == "Шукати замітки за тегом":
         apply_tag_search(tag)
@@ -117,17 +132,19 @@ def apply_tag_search(tag):
         if tag in value["теги"]:
             notes_filtered[note] = value
 
-    button_tag_search.setText("Скинути пошук")
-    list_notes.clear()
-    list_tags.clear()
-    list_notes.addItems(notes_filtered)
+    searchnote.setText("Скинути пошук")
+    listnotes.clear()
+    listteg.clear()
+    listnotes.addItems(notes_filtered)
 
 def reset_search():
-    field_tag.clear()
-    list_notes.clear()
-    list_tags.clear()
-    list_notes.addItems(notes)
-    button_tag_search.setText("Шукати замітки за тегом")
+    textedit.clear()
+    listnotes.clear()
+    listteg.clear()
+    listnotes.addItems(notes)
+    searchnote.setText("Шукати замітки за тегом")
+addtonote.clicked.connect(add_tag)
+searchnote.clicked.connect(search_tag)
 deletefromnote.clicked.connect(del_tag)
 deletenote.clicked.connect(del_note)
 listnotes.itemClicked.connect(show_note)
